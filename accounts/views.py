@@ -10,6 +10,7 @@ from . import models, forms
 
 
 def sign_in(request):
+    """  form to sign in the user """
     form = AuthenticationForm()
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
@@ -35,6 +36,7 @@ def sign_in(request):
 
 
 def sign_up(request):
+    """to create user from sign up form """
     form = UserCreationForm()
     if request.method == 'POST':
         form = UserCreationForm(data=request.POST)
@@ -60,6 +62,7 @@ def sign_up(request):
 
 @login_required
 def sign_out(request):
+    """signs out user """
     logout(request)
     messages.success(request, "You've been signed out. Come back soon!")
     return HttpResponseRedirect(reverse('home'))
@@ -67,12 +70,14 @@ def sign_out(request):
 
 @login_required
 def profile(request):
+    """ displays users profile """
     profile = get_object_or_404(models.Profile, pk=request.user.id)
     return render(request, 'profile.html', {'profile': profile})
 
 
 @login_required
 def edit_profile(request):
+    """displays form to edit user profile detials"""
     profile = get_object_or_404(models.Profile, pk=request.user.id)
     form = forms.EditFormWithValidation(instance=profile)
 
@@ -84,6 +89,10 @@ def edit_profile(request):
             messages.success(request,
                              "Updated {}'s profile".format(
                                  form.cleaned_data['first_name']))
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.email = form.cleaned_data['email']
+            request.user.save()
             return HttpResponseRedirect(reverse('accounts:profile'))
     return render(request, 'edit.html',
                   {'form': form, 'profile': profile})
@@ -91,6 +100,7 @@ def edit_profile(request):
 
 @login_required
 def change_password(request):
+    """displays form to change password """
     form = PasswordChangeForm(user=request.user)
     if request.method == 'POST':
         form = PasswordChangeForm(data=request.POST, user=request.user)
